@@ -18,4 +18,4 @@ net.floodlightcontroller.topology.TopologyManager
 net.floodlightcontroller.loadbalancer.LoadBalancer
 net.floodlightcontroller.linkdiscovery.internal.LinkDiscoveryManager
 net.floodlightcontroller.devicemanager.internal.DeviceManagerImpl
-net.floodlightcontroller.egp.egpkeepalive.EGPKeepAlive
+net.floodlightcontroller.ipv6.IPv6
