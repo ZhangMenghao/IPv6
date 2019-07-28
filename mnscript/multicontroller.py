@@ -30,14 +30,14 @@ def multiControllerNet():
     net = Mininet(controller=RemoteController, switch=MultiSwitch , link=TCLink , autoSetMacs=True )
 
     print "*** Creating (reference) controllers"
-    c1 = net.addController('c1', port=6653, ip='127.0.0.1' )
-    c2 = net.addController('c2', port=6656, ip='127.0.0.1' )
-    c3 = net.addController('c3', port=6659, ip='127.0.0.1' )
+    c1 = net.addController('c1', port=6653, inet6='::1/128' )
+    c2 = net.addController('c2', port=6656, inet6='::1/128' )
+    c3 = net.addController('c3', port=6659, inet6='::1/128' )
 
     print "*** Creating switches"
-    s1  = net.addSwitch('s1', protocols="OpenFlow10" )
-    s2  = net.addSwitch('s2', protocols="OpenFlow10" )
-    s3  = net.addSwitch('s3', protocols="OpenFlow10" )
+    s1  = net.addSwitch('s1', protocols="OpenFlow13" )
+    s2  = net.addSwitch('s2', protocols="OpenFlow13" )
+    s3  = net.addSwitch('s3', protocols="OpenFlow13" )
 
     print "*** Creating hosts"
     h1 = net.addHost('h1')

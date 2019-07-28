@@ -24,6 +24,8 @@ import org.projectfloodlight.openflow.types.DatapathId;
 import org.projectfloodlight.openflow.types.EthType;
 import org.projectfloodlight.openflow.types.IPv4Address;
 import org.projectfloodlight.openflow.types.IPv4AddressWithMask;
+import org.projectfloodlight.openflow.types.IPv6Address;
+import org.projectfloodlight.openflow.types.IPv6AddressWithMask;
 import org.projectfloodlight.openflow.types.IpProtocol;
 import org.projectfloodlight.openflow.types.MacAddress;
 import org.projectfloodlight.openflow.types.OFBufferId;
@@ -47,6 +49,7 @@ import net.floodlightcontroller.egp.controller.ControllerMain;
 import net.floodlightcontroller.packet.Data;
 import net.floodlightcontroller.packet.Ethernet;
 import net.floodlightcontroller.packet.IPv4;
+import net.floodlightcontroller.packet.IPv6;
 import net.floodlightcontroller.packet.UDP;
 
 public class EGPKeepAlive implements IFloodlightModule, IOFMessageListener,
@@ -134,10 +137,10 @@ public class EGPKeepAlive implements IFloodlightModule, IOFMessageListener,
         		? myPacketIn.getInPort() : myPacketIn.getMatch().get(MatchField.IN_PORT);
         		Ethernet eth = IFloodlightProviderService.bcStore.get(cntx,
         				IFloodlightProviderService.CONTEXT_PI_PAYLOAD);
-        		if (eth.getEtherType() == EthType.IPv4){
-        			IPv4 ipv4 = (IPv4) eth.getPayload();
-        			if (ipv4.getProtocol() == IpProtocol.UDP){
-        				UDP udp = (UDP) ipv4.getPayload();
+        		if (eth.getEtherType() == EthType.IPv6){
+        			IPv6 ipv6 = (IPv6) eth.getPayload();
+        			if (ipv6.getNextHeader() == IpProtocol.UDP){
+        				UDP udp = (UDP) ipv6.getPayload();
         				TransportPort srcPort = udp.getSourcePort();
         				TransportPort dstPort = udp.getDestinationPort();
         				if (srcPort.equals(TransportPort.of(30001)) && dstPort.equals(TransportPort.of(30002))){
@@ -208,13 +211,17 @@ public class EGPKeepAlive implements IFloodlightModule, IOFMessageListener,
 		Ethernet eth = new Ethernet();
 		eth.setSourceMACAddress(MacAddress.of("10:00:00:00:00:00"));
 		eth.setDestinationMACAddress(MacAddress.of("11:00:00:00:00:00"));
-		eth.setEtherType(EthType.IPv4);
+		eth.setEtherType(EthType.IPv6);
 	 
 		/* Compose L3 packet. */
-		IPv4 ipv4 = new IPv4();
+		/*IPv4 ipv4 = new IPv4();
 		ipv4.setSourceAddress(IPv4Address.of("127.0.0.1"));
 		ipv4.setDestinationAddress(IPv4Address.of("127.0.0.1"));
-		ipv4.setProtocol(IpProtocol.UDP);
+		ipv4.setProtocol(IpProtocol.UDP);*/
+		IPv6 ipv6 = new IPv6();
+		ipv6.setSourceAddress(IPv6Address.of("::1"));
+		ipv6.setDestinationAddress(IPv6Address.of("::1"));
+		ipv6.setNextHeader(IpProtocol.UDP);
 		
 		/* Compose L4 packet. */
 		UDP udp = new UDP();
@@ -228,8 +235,10 @@ public class EGPKeepAlive implements IFloodlightModule, IOFMessageListener,
 		data.setData(Keepalivebyte);
 				 
 		/* Set L2 L3 L4's payload */
-		eth.setPayload(ipv4);
-		ipv4.setPayload(udp);
+		/*eth.setPayload(ipv4);
+		ipv4.setPayload(udp);*/
+		eth.setPayload(ipv6);
+		ipv6.setPayload(udp);
 		udp.setPayload(data);
 
 		 
@@ -252,18 +261,18 @@ public class EGPKeepAlive implements IFloodlightModule, IOFMessageListener,
 		mySwitch.write(myPacketOut);
 	}
 	
-	public static void createFlowMods(String switchid, String srcipv4, String dstipv4, 
+	public static void createFlowMods(String switchid, String srcipv6, String dstipv6, 
 			String protocol, String srcport, String dstport, int outport){
 		IOFSwitch mySwitch = switchService.getSwitch(DatapathId.of(switchid));
 		OFFactory myFactory = mySwitch.getOFFactory();
 		OFVersion myVersion = myFactory.getVersion();
 		
 		Match.Builder myMatchBuilder = myFactory.buildMatch();
-		myMatchBuilder.setExact(MatchField.ETH_TYPE, EthType.IPv4);
-		if (srcipv4 != null)
-			myMatchBuilder.setMasked(MatchField.IPV4_SRC, IPv4AddressWithMask.of(srcipv4));
-		if (dstipv4 != null)
-			myMatchBuilder.setMasked(MatchField.IPV4_DST, IPv4AddressWithMask.of(dstipv4));
+		myMatchBuilder.setExact(MatchField.ETH_TYPE, EthType.IPv6);
+		if (srcipv6 != null)
+			myMatchBuilder.setMasked(MatchField.IPV6_SRC, IPv6AddressWithMask.of(srcipv6));
+		if (dstipv6 != null)
+			myMatchBuilder.setMasked(MatchField.IPV6_DST, IPv6AddressWithMask.of(dstipv6));
 		if (protocol != null){
 			if (protocol.equalsIgnoreCase("tcp")){
 				myMatchBuilder.setExact(MatchField.IP_PROTO, IpProtocol.TCP);
@@ -316,17 +325,17 @@ public class EGPKeepAlive implements IFloodlightModule, IOFMessageListener,
 		
 	}
 	
-	public static void deleteFlowMods(String switchid, String srcipv4, String dstipv4, 
+	public static void deleteFlowMods(String switchid, String srcipv6, String dstipv6, 
 			String protocol, String srcport, String dstport, int outport){
 		IOFSwitch mySwitch = switchService.getSwitch(DatapathId.of(switchid));
 		OFFactory myFactory = mySwitch.getOFFactory();
 		
 		Match.Builder myMatchBuilder = myFactory.buildMatch();
-		myMatchBuilder.setExact(MatchField.ETH_TYPE, EthType.IPv4);
-		if (srcipv4 != null)
-			myMatchBuilder.setMasked(MatchField.IPV4_SRC, IPv4AddressWithMask.of(srcipv4));
-		if (dstipv4 != null)
-			myMatchBuilder.setMasked(MatchField.IPV4_DST, IPv4AddressWithMask.of(dstipv4));
+		myMatchBuilder.setExact(MatchField.ETH_TYPE, EthType.IPv6);
+		if (srcipv6 != null)
+			myMatchBuilder.setMasked(MatchField.IPV6_SRC, IPv6AddressWithMask.of(srcipv6));
+		if (dstipv6 != null)
+			myMatchBuilder.setMasked(MatchField.IPV6_DST, IPv6AddressWithMask.of(dstipv6));
 		if (protocol != null){
 			if (protocol.equalsIgnoreCase("tcp")){
 				myMatchBuilder.setExact(MatchField.IP_PROTO, IpProtocol.TCP);
