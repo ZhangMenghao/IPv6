@@ -80,4 +80,3 @@ def multiControllerNet():
 if __name__ == '__main__':
     setLogLevel( 'info' )  # for CLI output
     multiControllerNet()
-

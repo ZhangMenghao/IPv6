@@ -18,8 +18,12 @@ import org.projectfloodlight.openflow.protocol.OFVersion;
 import org.projectfloodlight.openflow.protocol.action.OFAction;
 import org.projectfloodlight.openflow.protocol.action.OFActionOutput;
 import org.projectfloodlight.openflow.protocol.action.OFActions;
+import org.projectfloodlight.openflow.protocol.instruction.OFInstruction;
+import org.projectfloodlight.openflow.protocol.instruction.OFInstructionApplyActions;
+import org.projectfloodlight.openflow.protocol.instruction.OFInstructions;
 import org.projectfloodlight.openflow.protocol.match.Match;
 import org.projectfloodlight.openflow.protocol.match.MatchField;
+import org.projectfloodlight.openflow.protocol.oxm.OFOxms;
 import org.projectfloodlight.openflow.types.DatapathId;
 import org.projectfloodlight.openflow.types.EthType;
 import org.projectfloodlight.openflow.types.IPv4Address;
@@ -317,6 +321,37 @@ public class EGPKeepAlive implements IFloodlightModule, IOFMessageListener,
 					    .build();
 				
 				mySwitch.write(flowAdd10);
+				break;
+			case OF_13:
+				ArrayList<OFAction> actionList13 = new ArrayList<OFAction>();
+				OFInstructions instructions13 = myFactory.instructions();
+				OFActions actions13 = myFactory.actions();
+				
+				OFActionOutput output13 = actions13.buildOutput()
+					    .setMaxLen(0xFFFFFFFF)
+					    .setPort(OFPort.of(outport))
+					    .build();
+				actionList13.add(output13);
+					
+				
+				OFInstructionApplyActions applyActions13 = instructions13.buildApplyActions()
+						.setActions(actionList13)
+						.build();
+				
+				ArrayList<OFInstruction> instructionList13 = new ArrayList<OFInstruction>();
+				instructionList13.add(applyActions13);
+				
+				OFFlowAdd flowAdd13 = myFactory.buildFlowAdd()
+						.setBufferId(OFBufferId.NO_BUFFER)
+						.setHardTimeout(3600)
+						.setIdleTimeout(3600)
+						.setPriority(32768)
+						.setMatch(myMatch)
+						.setInstructions(instructionList13)
+						.setOutPort(OFPort.of(outport))
+						.build();
+					
+					mySwitch.write(flowAdd13);
 				break;
 			default:
 				logger.error("Unsupported OFVersion: {}", myVersion.toString());

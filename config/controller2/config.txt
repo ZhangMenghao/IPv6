@@ -3,7 +3,7 @@
 	"localAs":
 	[
 		{
-			"dstIp":"22::/64",
+			"dstIp":"2222::/64",
 			"outPort":
 			[
 				{
