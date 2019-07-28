@@ -1,0 +1,9 @@
+jdk=1.8.0
+ant>=1.10.0
+floodlight=1.2
+eclipse=2019-03
+
+
+mininet=2.2.1
+openvswitch=2.5.5
+apt install mininet

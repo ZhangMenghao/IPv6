@@ -1,0 +1,16 @@
+py "Configuring network"
+
+h1 sysctl net.ipv6.conf.all.disable_ipv6=0
+h1 ifconfig h1-eth0 inet6 add 1111::2/64
+h1 ip -6 route add default via 1111::1
+h1 ip neigh add 1111::1 lladdr 00:00:00:00:00:10 dev h1-eth0
+
+h2 sysctl net.ipv6.conf.all.disable_ipv6=0
+h2 ifconfig h2-eth0 inet6 add 2222::2/64
+h2 ip -6 route add default via 2222::1
+h2 ip neigh add 2222::1 lladdr 00:00:00:00:00:10 dev h2-eth0
+
+h3 sysctl net.ipv6.conf.all.disable_ipv6=0
+h3 ifconfig h3-eth0 inet6 add 3333::2/64
+h3 ip -6 route add default via 3333::1
+h3 ip neigh add 3333::1 lladdr 00:00:00:00:00:10 dev h3-eth0
