@@ -21,3 +21,7 @@
 3. 下发流表，命令为：
     sudo bash hostflowtable.sh
 4. 主机之间相互能够ping通。
+
+## show flow entries
+1. sh ovs-ofctl -O Openflow13 dump-flows s1
+2. h1's ipv6 address is 1111::2, h2's ipv6 address is 2222::2, h3's ipv6 address is 3333::2.
